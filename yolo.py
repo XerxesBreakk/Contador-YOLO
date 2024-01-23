@@ -6,7 +6,7 @@ import datetime
 model = YOLO("yolov8n.pt")
 in_counts = 0
 out_counts = 0
-ip_addr = '192.168.1.103'
+ip_addr = '192.168.1.102'
 stream_url = 'http://' + ip_addr + ':81/stream'
 cap=cv2.VideoCapture(stream_url) 
 
@@ -32,7 +32,7 @@ counter.set_args(
     classes_names={0: 'person'},
     draw_tracks=True,
 )
-endTime = datetime.datetime.now() + datetime.timedelta(seconds=30)
+endTime = datetime.datetime.now() + datetime.timedelta(minutes=1)
 
 print("INICIO!")
 
