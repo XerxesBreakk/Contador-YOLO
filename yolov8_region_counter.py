@@ -13,6 +13,8 @@ from ultralytics import YOLO
 from ultralytics.utils.files import increment_path
 from ultralytics.utils.plotting import Annotator, colors
 
+import datetime
+
 track_history = defaultdict(list)
 
 current_region = None
@@ -86,10 +88,10 @@ def run(
     weights="yolov8n.pt",
     source=None,
     device="cpu",
-    view_img=False,
+    view_img=True,
     save_img=False,
     exist_ok=False,
-    classes=None,
+    classes=[0],
     line_thickness=2,
     track_thickness=2,
     region_thickness=2,
@@ -114,7 +116,7 @@ def run(
         region_thickness (int): Region thickness.
     """
     vid_frame_count = 0
-
+    final_count=0
     # Check source path
     """ if not Path(source).exists():
         raise FileNotFoundError(f"Source path '{source}' does not exist.") """
@@ -127,7 +129,7 @@ def run(
     names = model.model.names
 
     # Video setup
-    ip_addr = '192.168.1.102'
+    ip_addr = '192.168.1.101'
     stream_url = 'http://' + ip_addr + ':81/stream'
     videocapture=cv2.VideoCapture(stream_url)
     #videocapture = cv2.VideoCapture(source)
@@ -139,13 +141,16 @@ def run(
     save_dir.mkdir(parents=True, exist_ok=True)
     video_writer = cv2.VideoWriter(str(save_dir / f"{Path(source).stem}.mp4"), fourcc, fps, (frame_width, frame_height))
 
+    endTime = datetime.datetime.now() + datetime.timedelta(minutes=1)
+
     # Iterate over video frames
-    while videocapture.isOpened():
+    while videocapture.isOpened() and datetime.datetime.now() <= endTime:
         success, frame = videocapture.read()
         if not success:
             break
         vid_frame_count += 1
 
+        print(classes)
         # Extract the results
         results = model.track(frame, persist=True, classes=classes)
 
@@ -171,7 +176,8 @@ def run(
                 for region in counting_regions:
                     if region["polygon"].contains(Point((bbox_center[0], bbox_center[1]))):
                         region["counts"] += 1
-            print(region['counts'])                
+            if region['counts']>final_count:
+                final_count=region['counts']
 
         # Draw regions (Polygons/Rectangles)
         for region in counting_regions:
@@ -219,6 +225,8 @@ def run(
     videocapture.release()
     cv2.destroyAllWindows()
 
+    return final_count
+
 
 def parse_opt():
     """Parse command line arguments."""
@@ -229,7 +237,7 @@ def parse_opt():
     parser.add_argument("--view-img", action="store_true", help="show results")
     parser.add_argument("--save-img", action="store_true", help="save results")
     parser.add_argument("--exist-ok", action="store_true", help="existing project/name ok, do not increment")
-    parser.add_argument("--classes", nargs="+", type=int, help="filter by class: --classes 0, or --classes 0 2 3")
+    #parser.add_argument("--classes", nargs="+", type=int, help="filter by class: --classes 0, or --classes 0 2 3")
     parser.add_argument("--line-thickness", type=int, default=2, help="bounding box thickness")
     parser.add_argument("--track-thickness", type=int, default=2, help="Tracking line thickness")
     parser.add_argument("--region-thickness", type=int, default=4, help="Region thickness")

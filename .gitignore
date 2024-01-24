@@ -1,3 +1,4 @@
 ultralytics/
 yolov8n.pt
 ultralytics_rc_output/
+__pycache__/
