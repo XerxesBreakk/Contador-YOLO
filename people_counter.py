@@ -43,7 +43,7 @@ def run(
     names = model.model.names
     
     # Video setup
-    ip_addr = '192.168.1.101'
+    ip_addr = '192.168.1.104'
     stream_url = 'http://' + ip_addr + ':81/stream'
     videocapture=cv2.VideoCapture(stream_url)
 
