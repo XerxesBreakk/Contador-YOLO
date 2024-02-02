@@ -6,6 +6,8 @@ import datetime
 from ultralytics.utils.plotting import Annotator, colors
 import numpy as np
 from shapely.geometry.point import Point
+from ultralytics.utils.files import increment_path
+from pathlib import Path
 
 track_history = defaultdict(list)
 
@@ -43,10 +45,10 @@ def run(
     names = model.model.names
     
     # Video setup
-    ip_addr = '192.168.1.104'
+    ip_addr = '192.168.1.100'
     stream_url = 'http://' + ip_addr + ':81/stream'
     videocapture=cv2.VideoCapture(stream_url)
-
+    
     endTime = datetime.datetime.now() + datetime.timedelta(seconds=15)
 
     # Iterate over video frames
@@ -81,12 +83,40 @@ def run(
                         region["counts"] += 1
             if region['counts']>final_count:
                 final_count=region['counts']
+
+        # Draw regions (Polygons/Rectangles)
+        """ for region in counting_regions:
+            region_label = str(region["counts"])
+            region_color = region["region_color"]
+            region_text_color = region["text_color"]
+
+            polygon_coords = np.array(region["polygon"].exterior.coords, dtype=np.int32)
+            centroid_x, centroid_y = int(region["polygon"].centroid.x), int(region["polygon"].centroid.y)
+
+            text_size, _ = cv2.getTextSize(
+                region_label, cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7, thickness=line_thickness
+            )
+            text_x = centroid_x - text_size[0] // 2
+            text_y = centroid_y + text_size[1] // 2
+            cv2.rectangle(
+                frame,
+                (text_x - 5, text_y - text_size[1] - 5),
+                (text_x + text_size[0] + 5, text_y + 5),
+                region_color,
+                -1,
+            )
+            cv2.putText(
+                frame, region_label, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, region_text_color, line_thickness
+            )
+            cv2.polylines(frame, [polygon_coords], isClosed=True, color=region_color, thickness=region_thickness) """
         
         if view_img:
             if vid_frame_count == 1:
                 cv2.namedWindow("Ultralytics YOLOv8 Region Counter Movable")
-                #cv2.setMouseCallback("Ultralytics YOLOv8 Region Counter Movable", mouse_callback)
             cv2.imshow("Ultralytics YOLOv8 Region Counter Movable", frame)
+
+        #if save_img:
+        #    video_writer.write(frame)
 
         for region in counting_regions:  # Reinitialize count for each region
             region["counts"] = 0
@@ -98,5 +128,15 @@ def run(
     #video_writer.release()
     videocapture.release()
     cv2.destroyAllWindows()
+    print("end of count")
 
     return final_count
+
+
+def main():
+    """Main function."""
+    run()
+
+
+if __name__ == "__main__":
+    main()
