@@ -12,6 +12,8 @@ from pathlib import Path
 track_history = defaultdict(list)
 
 current_region = None
+
+#Region en la que realizara analisis
 counting_regions = [
     {
         "name": "YOLOv8 Rectangle Region",
@@ -38,6 +40,7 @@ def run(
     vid_frame_count = 0
     final_count=0
 
+    #Yolo model
     model = YOLO(f"{weights}")
     model.to("cuda") if device == "0" else model.to("cpu")
 
@@ -57,8 +60,11 @@ def run(
         if not success:
             break
         vid_frame_count += 1
+
+        #Extract the results from the deteccion apply to the frame
         results = model.track(frame, persist=True, classes=classes)
 
+        #Deconstruction of the results from the analysis
         if results[0].boxes.id is not None:
             boxes = results[0].boxes.xyxy.cpu()
             track_ids = results[0].boxes.id.int().cpu().tolist()
