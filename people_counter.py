@@ -50,8 +50,10 @@ def run(
     # Video setup
     ip_addr = '192.168.1.100'
     stream_url = 'http://' + ip_addr + ':81/stream'
-    videocapture=cv2.VideoCapture(stream_url)
+    video="people.mp4"
+    videocapture=cv2.VideoCapture(video)
     
+    #time to analysis
     endTime = datetime.datetime.now() + datetime.timedelta(seconds=15)
 
     # Iterate over video frames
@@ -117,8 +119,8 @@ def run(
             cv2.polylines(frame, [polygon_coords], isClosed=True, color=region_color, thickness=region_thickness) """
         
         if view_img:
-            if vid_frame_count == 1:
-                cv2.namedWindow("Ultralytics YOLOv8 Region Counter Movable")
+            #if vid_frame_count == 1:
+                #cv2.namedWindow("Ultralytics YOLOv8 Region Counter Movable")
             cv2.imshow("Ultralytics YOLOv8 Region Counter Movable", frame)
 
         #if save_img:
